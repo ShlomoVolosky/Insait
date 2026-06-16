@@ -2,6 +2,7 @@
 
 from fastapi import FastAPI
 
+from app.api.errors import register_error_handlers
 from app.api.routes import router
 from app.infrastructure.config import Settings
 
@@ -10,7 +11,7 @@ def create_app() -> FastAPI:
     settings = Settings()
     app = FastAPI(title=settings.app_name, version=settings.version)
     app.include_router(router)
-    # Error handlers are registered in Stage 5.
+    register_error_handlers(app)
     return app
 
 

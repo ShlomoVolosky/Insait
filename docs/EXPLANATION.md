@@ -81,6 +81,30 @@ FastAPI עצמה נתפסת וממופה למעטפת זו, כך ששום מבנ
 ב-`--allow-unauthenticated` כדי שה-webhook של Insait יוכל לפנות לשירות, וב-`--min-instances 1`
 כדי לצמצם השהיית "קור" (cold start).
 
+### 2.5 אינטגרציה עם מרשם הרכב הארצי (data.gov.il)
+
+ברירת המחדל היא `InMemoryVehicleRepository` — מאגר בזיכרון עם נתוני דמו, שמספק הדגמה צפויה
+ויציבה וללא תלות ברשת. לצידו, `DataGovVehicleRepository` מממש את אותו פורט `VehicleRepository`
+מול מרשם הרכב הממשלתי הפתוח של data.gov.il. המעבר בין שני המקורות נעשה דרך משתנה הסביבה
+`REPOSITORY=http` בלבד — ללא שינוי כלשהו בשכבות `domain` / `application` / `api`. זו בדיוק
+התועלת של הארכיטקטורה המשושה: החלפת מקור הנתונים ממוקדת ב-adapter יחיד.
+
+מיפוי השדות ממבנה המרשם לישות `Vehicle`:
+
+| שדה במרשם | שדה ב-`Vehicle` |
+|---|---|
+| `mispar_rechev` | `license_plate` |
+| `tozeret_nm` | `manufacturer` |
+| `kinuy_mishari` | `model` |
+| `shnat_yitzur` | `year` |
+| `tzeva_rechev` | `color` |
+
+המיפוי אומת מול ה-API החי באמצעות מספר רישוי אמיתי.
+
+![אינטגרציה עם מרשם הרכב — data.gov.il](screenshots/07-real-registry-datagov.png)
+
+*תמונה 7: שליפת פרטי רכב אמיתי ממרשם data.gov.il דרך `DataGovVehicleRepository` (`REPOSITORY=http`).*
+
 ---
 
 ## 3. הסבר על אינטגרציית ה-API

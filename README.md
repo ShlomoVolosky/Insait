@@ -198,3 +198,4 @@ flowchart TD
 - [ ] The Insait flow editor
 - [ ] A full successful run (Part B conversation)
 - [x] An error run (not-found / validation) — [`02`](docs/screenshots/02-not-found-edge-case.png), [`03`](docs/screenshots/03-validation-string-edge-case.png), [`04`](docs/screenshots/04-validation-too-short-edge-case.png)
+- [x] Real-registry integration (data.gov.il) — [`07-real-registry-datagov.png`](docs/screenshots/07-real-registry-datagov.png)

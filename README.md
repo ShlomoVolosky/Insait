@@ -193,8 +193,8 @@ flowchart TD
 
 ## Screenshot checklist (for submission)
 
-- [ ] Swagger `/docs` page
-- [ ] A live API call (curl output or Swagger "Try it out")
+- [x] Swagger `/docs` page — [`01-swagger-success.png`](docs/screenshots/01-swagger-success.png)
+- [x] A live API call (curl output or Swagger "Try it out") — [`05-terminal-edge-cases.png`](docs/screenshots/05-terminal-edge-cases.png)
 - [ ] The Insait flow editor
 - [ ] A full successful run (Part B conversation)
-- [ ] An error run (not-found / validation)
+- [x] An error run (not-found / validation) — [`02`](docs/screenshots/02-not-found-edge-case.png), [`03`](docs/screenshots/03-validation-string-edge-case.png), [`04`](docs/screenshots/04-validation-too-short-edge-case.png)

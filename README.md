@@ -152,16 +152,44 @@ infra┘                   ▲
      └───────────────────┘
 ```
 
-- `domain/` — `Vehicle`, plate validation, exceptions, and the ports
-  (`VehicleRepository` outbound, `GetVehicleInfo` inbound). No framework imports.
-- `application/` — `GetVehicleInfoUseCase` (validate → look up → return / raise).
-- `infrastructure/` — adapters behind the outbound port: `InMemoryVehicleRepository`
-  (default, seeded) and an optional `HttpVehicleRepository`; settings.
-- `api/` — FastAPI schemas, routes, DI wiring, and error handlers that normalize
-  every failure into the unified envelope.
+The framework-free `domain` layer holds the `Vehicle` entity, plate-validation rules,
+and the `VehicleRepository` (outbound) / `GetVehicleInfo` (inbound) ports; `application`
+holds the `GetVehicleInfoUseCase`; `infrastructure` provides adapters behind the outbound
+port (the default seeded `InMemoryVehicleRepository` plus an optional `HttpVehicleRepository`)
+and settings; and `api` is the FastAPI surface that wires them together and normalizes every
+failure into the unified envelope. Keeping the data source behind a port means it can be
+swapped without touching the core. See [`docs/EXPLANATION.md`](docs/EXPLANATION.md) for the
+full design rationale (Hebrew).
 
-See [`docs/EXPLANATION.md`](docs/EXPLANATION.md) for the full design rationale (Hebrew)
-and the Part B flow.
+## Insait Flow (Part B)
+
+The conversational flow (built in platform.insait.io) calls this API and branches on the
+`success` field — on success it confirms the vehicle details, otherwise it re-prompts for
+the plate.
+
+```mermaid
+flowchart TD
+    A[פתיחה] --> B{סוג ביטוח?}
+    B -->|מקיף| C[בקשת מספר רישוי]
+    B -->|חובה| C
+    C --> D[קריאה ל-API פרטי רכב]
+    D --> E{success == true?}
+    E -->|לא| F[שגיאה: הזנת מספר מחדש]
+    F --> C
+    E -->|כן| G[הצגת פרטי הרכב]
+    G --> H{המשתמש מאשר את הרכב?}
+    H -->|לא| C
+    H -->|כן| I[שם מלא]
+    I --> J[טלפון + ולידציה]
+    J --> K[אימייל + ולידציה]
+    K --> L{סוג == מקיף?}
+    L -->|כן| M[כיסויים נוספים - בחירה מרובה]
+    L -->|לא| N[סיכום]
+    M --> N
+    N --> O{אישור סופי?}
+    O -->|אישור| P[ההרשמה הושלמה]
+    O -->|עריכה| C
+```
 
 ## Screenshot checklist (for submission)
 

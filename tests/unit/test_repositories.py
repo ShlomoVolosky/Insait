@@ -5,7 +5,10 @@ import pytest
 
 from app.domain.models import Vehicle
 from app.infrastructure.config import Settings
-from app.infrastructure.repositories.http_proxy import HttpVehicleRepository
+from app.infrastructure.repositories.http_proxy import (
+    DataGovVehicleRepository,
+    HttpVehicleRepository,
+)
 from app.infrastructure.repositories.in_memory import InMemoryVehicleRepository
 
 
@@ -86,10 +89,82 @@ class TestHttpRepository:
         assert repo.find_by_plate("00000000") is None
 
 
+def _datagov_client(handler) -> httpx.Client:
+    return httpx.Client(transport=httpx.MockTransport(handler))
+
+
+_RESOURCE_ID = "053cea08-09bc-40ec-8f7a-156f0677aff3"
+
+
+class TestDataGovRepository:
+    def test_one_record_found_maps_to_vehicle(self):
+        def handler(request: httpx.Request) -> httpx.Response:
+            params = dict(request.url.params)
+            assert params["resource_id"] == _RESOURCE_ID
+            assert params["q"] == "12345678"
+            return httpx.Response(
+                200,
+                json={
+                    "success": True,
+                    "result": {
+                        "records": [
+                            {
+                                "mispar_rechev": 12345678,
+                                "tozeret_nm": "טויוטה",
+                                "kinuy_mishari": "קורולה",
+                                "shnat_yitzur": 2020,
+                                "tzeva_rechev": "לבן",
+                            }
+                        ]
+                    },
+                },
+            )
+
+        repo = DataGovVehicleRepository(_RESOURCE_ID, client=_datagov_client(handler))
+        vehicle = repo.find_by_plate("12345678")
+        assert isinstance(vehicle, Vehicle)
+        assert vehicle.license_plate == "12345678"
+        assert vehicle.manufacturer == "טויוטה"
+        assert vehicle.model == "קורולה"
+        assert vehicle.year == 2020
+        assert vehicle.color == "לבן"
+
+    def test_empty_result_returns_none(self):
+        def handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(200, json={"success": True, "result": {"records": []}})
+
+        repo = DataGovVehicleRepository(_RESOURCE_ID, client=_datagov_client(handler))
+        assert repo.find_by_plate("00000000") is None
+
+    def test_malformed_record_is_handled(self):
+        def handler(request: httpx.Request) -> httpx.Response:
+            # Missing tozeret_nm and a non-numeric year.
+            return httpx.Response(
+                200,
+                json={
+                    "success": True,
+                    "result": {
+                        "records": [
+                            {
+                                "mispar_rechev": 12345678,
+                                "kinuy_mishari": "קורולה",
+                                "shnat_yitzur": "NA",
+                                "tzeva_rechev": "לבן",
+                            }
+                        ]
+                    },
+                },
+            )
+
+        repo = DataGovVehicleRepository(_RESOURCE_ID, client=_datagov_client(handler))
+        assert repo.find_by_plate("12345678") is None
+
+
 class TestSettings:
     def test_defaults(self):
         settings = Settings()
         assert settings.repository == "memory"
+        assert settings.resource_id is None
         assert settings.upstream_url is None
         assert settings.app_name == "insurance-vehicle-api"
 

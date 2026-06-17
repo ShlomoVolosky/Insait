@@ -192,3 +192,16 @@ flowchart TD
     O -->|אישור| P[ההרשמה הושלמה]
     O -->|עריכה| C
 ```
+
+*התרשים שלמעלה (Mermaid) הוא הגרסה המפושטת לצורכי הסבר. להלן הזרימה כפי שנבנתה בפועל בפלטפורמת
+Insait, ולאחריה הקלטת ריצה מלאה מקצה לקצה.*
+
+![זרימת השיחה כפי שנבנתה בעורך Insait](screenshots/Agent-flow.svg)
+
+*תמונה 8: דיאגרמת זרימת השיחה המלאה כפי שנבנתה בעורך של Insait.*
+
+<video src="screenshots/full-agent-flow-video.webm" controls width="640"></video>
+
+[צפייה / הורדה של הסרטון: full-agent-flow-video.webm](screenshots/full-agent-flow-video.webm)
+
+*סרטון: הקלטת מסך של ריצה מלאה מקצה לקצה בזרימת Insait (אם הווידאו אינו מוטמע, השתמשו בקישור שמעל).*
